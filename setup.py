@@ -9,15 +9,16 @@ from distutils import util, log
 
 try:
     from setuptools import setup, Extension
-    args = {
-        'test_suite': 'test',
-        'zip_safe': False,
-    }
 except ImportError:
     from distutils.core import setup, Extension
-    args = {}
 
-from Cython.Distutils import build_ext
+
+if '--with-cython' in sys.argv:
+    from Cython.Distutils import build_ext
+    sys.argv.remove('--with-cython')
+    use_cython = True
+else:
+    use_cython = False
 
 
 class build_scripts_rename(build_scripts):
@@ -33,27 +34,29 @@ class build_scripts_rename(build_scripts):
 
 
 cmdclass = {
-    'build_scripts': build_scripts_rename,
-    'build_ext': build_ext,
+    'build_scripts': build_scripts_rename
 }
 
 ext_modules = [
     Extension(
         'liblo',
-        ['src/liblo.pyx'],
+        [use_cython and 'src/liblo.pyx' or 'src/liblo.c'],
         extra_compile_args = [
             '-fno-strict-aliasing',
             '-Werror-implicit-function-declaration',
             '-Wfatal-errors',
         ],
-        libraries = ['lo'],
+        libraries = ['lo']
     )
 ]
+
+if use_cython:
+    cmdclass['build_ext'] = build_ext
 
 
 setup(
     name = 'pyliblo',
-    version = '0.10.0',
+    version = '0.9.2',
     author = 'Dominic Sacré',
     author_email = 'dominic.sacre@gmx.de',
     url = 'http://das.nasophon.de/pyliblo/',
@@ -70,6 +73,5 @@ setup(
         ]),
     ],
     cmdclass = cmdclass,
-    ext_modules = ext_modules,
-    **args
+    ext_modules = ext_modules
 )

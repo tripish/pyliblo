@@ -9,6 +9,8 @@
 # License, or (at your option) any later version.
 #
 
+
+
 from libc.stdint cimport int32_t, uint32_t, int64_t, uint8_t
 from libc.stdio cimport const_char
 
@@ -45,8 +47,6 @@ cdef extern from 'lo/lo.h':
 
     ctypedef void(*lo_err_handler)(int num, const_char *msg, const_char *where)
     ctypedef int(*lo_method_handler)(const_char *path, const_char *types, lo_arg **argv, int argc, lo_message msg, void *user_data)
-    ctypedef int(*lo_bundle_start_handler)(lo_timetag time, void *user_data)
-    ctypedef int(*lo_bundle_end_handler)(void *user_data)
 
     # send
     int lo_send_message_from(lo_address targ, lo_server serv, char *path, lo_message msg)
@@ -60,7 +60,6 @@ cdef extern from 'lo/lo.h':
     int lo_server_get_protocol(lo_server s)
     lo_method lo_server_add_method(lo_server s, char *path, char *typespec, lo_method_handler h, void *user_data)
     void lo_server_del_method(lo_server s, char *path, char *typespec)
-    int lo_server_add_bundle_handlers(lo_server s, lo_bundle_start_handler sh, lo_bundle_end_handler eh, void *user_data)
     int lo_server_recv(lo_server s) nogil
     int lo_server_recv_noblock(lo_server s, int timeout) nogil
     int lo_server_get_socket_fd(lo_server s)
@@ -101,6 +100,12 @@ cdef extern from 'lo/lo.h':
     void lo_message_add_timetag(lo_message m, lo_timetag a)
     void lo_message_add_blob(lo_message m, lo_blob a)
     lo_address lo_message_get_source(lo_message m)
+
+    # ADDED BY TRIP MARCH 3, 2015
+    size_t lo_message_length(lo_message m, const char *path)
+    void *lo_message_serialise(lo_message m, const char *path, void *to,
+               size_t *size)
+    # lo_message lo_message_deserialise(void *data, size_t size, int *result)
 
     # blob
     lo_blob lo_blob_new(int32_t size, void *data)
